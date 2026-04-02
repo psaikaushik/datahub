@@ -368,7 +368,7 @@ iceberg_common = {
 mssql_common = {
     # Note: sqlalchemy-pytds>=1.0 requires SQLAlchemy>=2, so constrained to 0.x automatically
     "sqlalchemy-pytds>=0.3,<2.0.0",
-    "pyOpenSSL<26.0.0",
+    "pyOpenSSL>=26.0.0,<27.0.0",
 }
 
 postgres_common = {
@@ -698,7 +698,13 @@ plugins: Dict[str, Set[str]] = {
     # presto-on-hive is an alias for hive-metastore and needs to be kept in sync
     "presto-on-hive": sql_common
     | pyhive_common
-    | {"psycopg2-binary<3.0.0", "pymysql>=1.0.2,<2.0.0"},
+    | {
+        "psycopg2-binary<3.0.0",
+        "pymysql>=1.0.2,<2.0.0",
+        "pymetastore>=0.4.2,<1.0.0",
+        "tenacity>=8.0.1,<9.0.0",
+        "kerberos>=1.3.0,<2.0.0",
+    },
     "pulsar": {"requests<3.0.0"},
     "redash": {"redash-toolbelt<0.2.0", "sql-metadata<3.0.0"} | sqlglot_lib,
     "rdf": {"rdflib==6.3.2", "requests==2.32.5", "requests_file==3.0.1"},
@@ -708,6 +714,13 @@ plugins: Dict[str, Set[str]] = {
     | sqlglot_lib
     | classification_lib
     | {"db-dtypes"}  # Pandas extension data types
+    | cachetools_lib,
+    # Like snowflake-slim / bigquery-slim: Redshift metadata without sql_common / GE (urllib3 1.x lock-in).
+    "redshift-slim": redshift_common
+    | usage_common
+    | sqlglot_lib
+    | classification_lib
+    | {"db-dtypes"}
     | cachetools_lib,
     # S3 includes PySpark by default for profiling support (backward compatible)
     # Standard installation: pip install 'acryl-datahub[s3]' (with PySpark)
@@ -830,7 +843,7 @@ mypy_stubs = {
     "types-tabulate<0.10.0",
     # avrogen package requires this
     "types-pytz<2026.0.0",
-    "types-pyOpenSSL<26.0.0",
+    "types-pyOpenSSL>=24.1.0.20240722,<27.0.0",
     "types-click-spinner>=0.1.13.1,<=0.1.13.20250809",
     "types-ujson>=5.2.0,<6.0.0",
     "types-Deprecated<2.0.0",
